@@ -1,8 +1,9 @@
 # s3b
 S3boto is a tool for managing objects in Amazon S3 storage. It allows for making and removing "buckets" and uploading, downloading and removing "objects" from these buckets.
 
-#Production
+##Production
 
+```bash
 git clone https://github.com/mshalamov/s3b
 
 cd s3b
@@ -12,4 +13,5 @@ sudo ip install -U -r requirements.txt
 sudo python setup.py install
 
 s3b --help
+```
 
