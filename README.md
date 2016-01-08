@@ -8,9 +8,11 @@ git clone https://github.com/mshalamov/s3b
 
 cd s3b
 
-sudo pip install -U -r requirements.txt
+Create new virtualenv
 
-sudo python setup.py install
+pip install  -r requirements.txt
+
+python setup.py install
 
 s3b --help
 ```
