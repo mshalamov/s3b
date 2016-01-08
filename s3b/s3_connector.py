@@ -9,5 +9,6 @@ def connect_s3(access_key, secret_key, s3_host, port, is_secure):
         host=s3_host,
         port=port,
         is_secure=is_secure,
+        validate_certs=False,
         calling_format=boto.s3.connection.OrdinaryCallingFormat(),
     )
