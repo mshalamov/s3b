@@ -31,7 +31,7 @@ chunk_size = 52428800
 ##Commands
 
 ```
-List objects or buckets
+List buckets or oblects
       s3b list [BUCKET]
 
 Create bucket
