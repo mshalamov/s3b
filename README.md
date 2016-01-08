@@ -7,9 +7,9 @@ git clone https://github.com/mshalamov/s3b
 
 cd s3b
 
-pip install -U -r requirements.txt
+sudo ip install -U -r requirements.txt
 
-python setup.py install
+sudo python setup.py install
 
 s3b --help
 
