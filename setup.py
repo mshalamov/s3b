@@ -11,5 +11,5 @@ setup(
         'console_scripts': [
             's3b = s3b.runner:main',
         ],
-    },
+    }, requires=['filechunkio']
 )

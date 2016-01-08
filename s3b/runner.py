@@ -1,18 +1,20 @@
 from argparse import ArgumentParser
-import s3_connector
+from filechunkio import FileChunkIO
 import os
+import math
+import s3_connector
 
 desc = """
-
-"""
-usg = """
-
+S3b is a tool for managing objects in Amazon S3 storage. It allows for
+making and removing "buckets" and uploading, downloading and removing
+"objects" from these buckets.
 """
 
 
 def main():
-    parser = ArgumentParser(description=desc,
-                            usage=usg)
+    home = os.getenv('HOME')
+
+    parser = ArgumentParser(description=desc)
     subparsers = parser.add_subparsers(help='commands')
 
     # A list command
@@ -43,9 +45,26 @@ def main():
     get_parser.add_argument('bucketname', action='store', help='the bucket')
     get_parser.add_argument('filename', action='store', help='the file to get')
 
+    # A version command
+    parser.add_argument('--version', action='version', version='%(prog)s 0.1')
+
+    # A config file command
+    parser.add_argument('-c', '--config-file',
+                        default='%s/.s3b' % home,
+                        help='Config file name. Defaults to %s/.s3b' % home,
+                        metavar='FILE')
+
     args = vars(parser.parse_args())
 
-    conn = s3_connector.connect_s3()
+    # Get a config file
+    config = {}
+    execfile('%s/.s3b' % home, config)
+
+    conn = s3_connector.connect_s3(access_key=config['access_key'],
+                                   secret_key=config['secret_key'],
+                                   s3_host=config['s3_host'],
+                                   port=config['port'],
+                                   is_secure=config['is_secure'])
 
     if args['which'] == 'list' and args['bucketname'] is None:
         for bucket in conn.get_all_buckets():
@@ -74,11 +93,26 @@ def main():
 
     if args['which'] == 'put':
         bucket = conn.get_bucket(args['bucketname'])
-        key = bucket.new_key(os.path.basename(args['filename']))
-        key.set_contents_from_filename(args['filename'])
+        source_size = os.stat(args['filename']).st_size
+        if config['chunk_size'] > source_size:
+            bucket = conn.get_bucket(args['bucketname'])
+            key = bucket.new_key(os.path.basename(args['filename']))
+            key.set_contents_from_filename(args['filename'])
+        else:
+            multipart_upload = bucket.initiate_multipart_upload(os.path.basename(args['filename']))
+            chunk_count = int(math.ceil(source_size / float(config['chunk_size'])))
+            for i in range(chunk_count):
+                offset = config['chunk_size'] * i
+                with FileChunkIO(args['filename'], 'r', offset=offset,
+                                 bytes=min(config['chunk_size'], source_size - offset)) as fp:
+                    multipart_upload.upload_part_from_file(fp, part_num=i + 1)
+            multipart_upload.complete_upload()
 
     if args['which'] == 'get':
-        pass
+        bucket = conn.get_bucket(args['bucketname'])
+        key = bucket.get_key(os.path.basename(args['filename']))
+        key.get_contents_to_filename(args['filename'])
+
 
 if __name__ == '__main__':
     main()
