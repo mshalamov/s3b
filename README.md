@@ -15,7 +15,7 @@ sudo python setup.py install
 s3b --help
 ```
 To start, create an .s3b file in your home directory.  This file will contain your
-access key, secret access key, s3 host, port, secure or non secure connection(https/http) and chunk size.
+access key, secret access key, s3 host, port, secure or non secure connection (https/http) flag and chunk size.
 
 For example:
 
@@ -26,6 +26,25 @@ s3_host = '10.109.1.3'
 port = 8080
 is_secure = False
 chunk_size = 52428800
+```
+
+##Commands
+
+```
+List objects or buckets
+      s3b list [BUCKET]
+
+Create bucket
+      s3b create BUCKET
+
+Remove bucket or object
+      s3b delete BUCKET [OBJECT]
+
+Put object to bucket
+      s3b put BUCKET OBJECT
+
+Get object from bucket
+      s3b get BUCKET OBJECT
 ```
 
 ##Security Consideration
