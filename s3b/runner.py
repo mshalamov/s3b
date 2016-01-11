@@ -3,6 +3,7 @@ from filechunkio import FileChunkIO
 import os
 import math
 import s3_connector
+import s3_utils
 
 desc = """
 S3b is a tool for managing objects in Amazon S3 storage. It allows for
@@ -74,11 +75,13 @@ def main():
             )
 
     if args['which'] == 'list' and args['bucketname'] is not None:
-        for obj in conn.get_bucket(args['bucketname']).list():
+        buckets = conn.get_all_buckets()
+        bucket = s3_utils.get_bucket(buckets=buckets, bucket_name=args['bucketname'])
+        for item in bucket.list():
             print "{name}\t{size}\t{modified}".format(
-                name=obj.name,
-                size=obj.size,
-                modified=obj.last_modified,
+                name=item.name,
+                size=item.size,
+                modified=item.last_modified,
             )
 
     if args['which'] == 'create':
@@ -88,14 +91,15 @@ def main():
         conn.delete_bucket(args['bucketname'])
 
     if args['which'] == 'delete' and args['filename'] is not None:
-        bucket = conn.get_bucket(args['bucketname'])
+        buckets = conn.get_all_buckets()
+        bucket = s3_utils.get_bucket(buckets=buckets, bucket_name=args['bucketname'])
         bucket.delete_key(args['filename'])
 
     if args['which'] == 'put':
-        bucket = conn.get_bucket(args['bucketname'])
+        buckets = conn.get_all_buckets()
+        bucket = s3_utils.get_bucket(buckets=buckets, bucket_name=args['bucketname'])
         source_size = os.stat(args['filename']).st_size
         if config['chunk_size'] > source_size:
-            bucket = conn.get_bucket(args['bucketname'])
             key = bucket.new_key(os.path.basename(args['filename']))
             key.set_contents_from_filename(args['filename'])
         else:
@@ -109,7 +113,8 @@ def main():
             multipart_upload.complete_upload()
 
     if args['which'] == 'get':
-        bucket = conn.get_bucket(args['bucketname'])
+        buckets = conn.get_all_buckets()
+        bucket = s3_utils.get_bucket(buckets=buckets, bucket_name=args['bucketname'])
         key = bucket.get_key(os.path.basename(args['filename']))
         key.get_contents_to_filename(args['filename'])
 
