@@ -2,13 +2,12 @@
 s3b is a tool for managing objects in RadosGW, Amazon S3, Swift storage. It allows for making and removing "buckets" and uploading, downloading and removing "objects" from these buckets.
 
 ##Production
+Create and activate new virtual environment
 
 ```bash
 git clone https://github.com/mshalamov/s3b
 
 cd s3b
-
-Create new virtualenv
 
 pip install  -r requirements.txt
 
